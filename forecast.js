@@ -3,14 +3,12 @@ const { parseISO, format } = require("date-fns");
 function groupByDay(data) {
   const groupedData = {};
 
-  // Group entries by day
-  data.forEach((e) => {
-    const entryTime = parseISO(e.date_time);
-    const key = entryTime.toISOString().split("T")[0]; // Get date part only
-    if (!groupedData[key]) {
-      groupedData[key] = [];
-    }
-    groupedData[key].push(e);
+  data.forEach((entry) => {
+    const entryTime = parseISO(entry.date_time);
+    const [date] = entryTime.toISOString().split("T");
+
+    groupedData[date] ??= [];
+    groupedData[date].push(entry);
   });
 
   return groupedData;
