@@ -16,14 +16,12 @@ function groupByDay(data) {
   return groupedData;
 }
 
-function summarizeForecast(data) {
-  const groupedByDay = groupByDay(data);
-
+function createSumaries(groupedData) {
   const summaries = {};
 
   // Process each day
-  Object.keys(groupedByDay).forEach((day) => {
-    const entries = groupedByDay[day];
+  Object.keys(groupedData).forEach((day) => {
+    const entries = groupedData[day];
     const tempMorning = [];
     const rainMorning = [];
     const tempAfternoon = [];
@@ -85,6 +83,14 @@ function summarizeForecast(data) {
 
     summaries[dayName] = summary;
   });
+
+  return summaries;
+}
+
+function summarizeForecast(data) {
+  const groupedByDay = groupByDay(data);
+
+  const summaries = createSumaries(groupedByDay);
 
   return summaries;
 }
