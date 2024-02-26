@@ -31,13 +31,32 @@ function morningAverageTemp(items) {
       );
 }
 
+
+function morningChanceOfRain(items) {
+  const morningItems = items.filter((item) => {
+    const itemTime = parseISO(item.date_time);
+    const hour = itemTime.getHours();
+    return 6 <= hour && hour < 12;
+  });
+
+  return morningItems.length === 0
+    ? "Insufficient forecast data"
+    : Number(
+        (
+          morningItems.reduce(
+            (acc, item) => acc + item.probability_of_rain,
+            0
+          ) / morningItems.length
+        ).toFixed(2)
+      );
+}
+
 function createSumaries(groupedData) {
   const summaries = {};
 
   // Process each day
   Object.keys(groupedData).forEach((day) => {
     const items = groupedData[day];
-    const rainMorning = [];
     const tempAfternoon = [];
     const rainAfternoon = [];
     const tempAll = items.map((entry) => entry.average_temperature);
@@ -45,12 +64,9 @@ function createSumaries(groupedData) {
     items.forEach((entry) => {
       const entryTime = parseISO(entry.date_time);
       const hour = entryTime.getHours();
-      // Collect morning period entries
-      if (6 <= hour && hour < 12) {
-        rainMorning.push(entry.probability_of_rain);
-      }
+
       // Collect afternoon period entries
-      else if (12 <= hour && hour < 18) {
+      if (12 <= hour && hour < 18) {
         tempAfternoon.push(entry.average_temperature);
         rainAfternoon.push(entry.probability_of_rain);
       }
@@ -59,15 +75,8 @@ function createSumaries(groupedData) {
     const summary = {
       // If no morning data, report insufficient data
       morning_average_temperature: morningAverageTemp(items),
+      morning_chance_of_rain: morningChanceOfRain(items),
 
-      morning_chance_of_rain:
-        rainMorning.length === 0
-          ? "Insufficient forecast data"
-          : Number(
-              (
-                rainMorning.reduce((a, b) => a + b, 0) / rainMorning.length
-              ).toFixed(2)
-            ),
       // If no afternoon data, report insufficient data
       afternoon_average_temperature:
         tempAfternoon.length === 0
