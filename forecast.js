@@ -1,23 +1,29 @@
 const { parseISO, format } = require("date-fns");
 
-function summarizeForecast(data) {
-  const groupDay = {};
+function groupByDay(data) {
+  const groupedData = {};
 
   // Group entries by day
   data.forEach((e) => {
     const entryTime = parseISO(e.date_time);
     const key = entryTime.toISOString().split("T")[0]; // Get date part only
-    if (!groupDay[key]) {
-      groupDay[key] = [];
+    if (!groupedData[key]) {
+      groupedData[key] = [];
     }
-    groupDay[key].push(e);
+    groupedData[key].push(e);
   });
+
+  return groupedData;
+}
+
+function summarizeForecast(data) {
+  const groupedByDay = groupByDay(data);
 
   const summaries = {};
 
   // Process each day
-  Object.keys(groupDay).forEach((day) => {
-    const entries = groupDay[day];
+  Object.keys(groupedByDay).forEach((day) => {
+    const entries = groupedByDay[day];
     const tempMorning = [];
     const rainMorning = [];
     const tempAfternoon = [];
