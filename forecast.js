@@ -53,8 +53,8 @@ function getLowTemperature(items) {
   return Math.min(...items.map((item) => item.average_temperature));
 }
 
-function processDay([day, items]) {
-  const summary = {
+function processDay(items) {
+  return {
     morning_average_temperature: averageTemp(items.filter(isMorningItem)),
     morning_chance_of_rain: chanceOfRain(items.filter(isMorningItem)),
     afternoon_average_temperature: averageTemp(items.filter(isAfternoonItem)),
@@ -62,14 +62,15 @@ function processDay([day, items]) {
     high_temperature: getHighTemperature(items),
     low_temperature: getLowTemperature(items),
   };
-
-  return [formatDate(day), summary];
 }
 
 function summarizeForecast(data) {
   const groupedByDay = groupByDay(data);
 
-  const dayEntries = Object.entries(groupedByDay).map(processDay);
+  const dayEntries = Object.entries(groupedByDay).map(([day, items]) => [
+    formatDate(day),
+    processDay(items),
+  ]);
 
   return Object.fromEntries(dayEntries);
 }
