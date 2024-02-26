@@ -54,11 +54,14 @@ function getLowTemperature(items) {
 }
 
 function processDay(items) {
+  const morningItems = items.filter(isMorningItem);
+  const afternoonItems = items.filter(isAfternoonItem);
+
   return {
-    morning_average_temperature: averageTemp(items.filter(isMorningItem)),
-    morning_chance_of_rain: chanceOfRain(items.filter(isMorningItem)),
-    afternoon_average_temperature: averageTemp(items.filter(isAfternoonItem)),
-    afternoon_chance_of_rain: chanceOfRain(items.filter(isAfternoonItem)),
+    morning_average_temperature: averageTemp(morningItems),
+    morning_chance_of_rain: chanceOfRain(morningItems),
+    afternoon_average_temperature: averageTemp(afternoonItems),
+    afternoon_chance_of_rain: chanceOfRain(afternoonItems),
     high_temperature: getHighTemperature(items),
     low_temperature: getLowTemperature(items),
   };
