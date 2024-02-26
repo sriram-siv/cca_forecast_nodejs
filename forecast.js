@@ -1,66 +1,86 @@
-const { parseISO, format } = require('date-fns');
+const { parseISO, format } = require("date-fns");
 
 function summarizeForecast(data) {
-    const grpDay = {};
+  const groupDay = {};
 
-    // Group entries by day
-    data.forEach(e => {
-        const entryTime = parseISO(e.date_time);
-        const key = entryTime.toISOString().split('T')[0]; // Get date part only
-        if (!grpDay[key]) {
-            grpDay[key] = [];
-        }
-        grpDay[key].push(e);
+  // Group entries by day
+  data.forEach((e) => {
+    const entryTime = parseISO(e.date_time);
+    const key = entryTime.toISOString().split("T")[0]; // Get date part only
+    if (!groupDay[key]) {
+      groupDay[key] = [];
+    }
+    groupDay[key].push(e);
+  });
+
+  const summaries = {};
+
+  // Process each day
+  Object.keys(groupDay).forEach((day) => {
+    const entries = groupDay[day];
+    const tempMorning = [];
+    const rainMorning = [];
+    const tempAfternoon = [];
+    const rainAfternoon = [];
+    const tempAll = entries.map((entry) => entry.average_temperature);
+
+    entries.forEach((entry) => {
+      const entryTime = parseISO(entry.date_time);
+      const hour = entryTime.getHours();
+      // Collect morning period entries
+      if (6 <= hour && hour < 12) {
+        tempMorning.push(entry.average_temperature);
+        rainMorning.push(entry.probability_of_rain);
+      }
+      // Collect afternoon period entries
+      else if (12 <= hour && hour < 18) {
+        tempAfternoon.push(entry.average_temperature);
+        rainAfternoon.push(entry.probability_of_rain);
+      }
     });
 
-    const summaries = {};
+    const summary = {
+      // If no morning data, report insufficient data
+      morning_average_temperature:
+        tempMorning.length === 0
+          ? "Insufficient forecast data"
+          : Math.round(
+              tempMorning.reduce((a, b) => a + b, 0) / tempMorning.length
+            ),
+      morning_chance_of_rain:
+        rainMorning.length === 0
+          ? "Insufficient forecast data"
+          : Number(
+              (
+                rainMorning.reduce((a, b) => a + b, 0) / rainMorning.length
+              ).toFixed(2)
+            ),
+      // If no afternoon data, report insufficient data
+      afternoon_average_temperature:
+        tempAfternoon.length === 0
+          ? "Insufficient forecast data"
+          : Math.round(
+              tempAfternoon.reduce((a, b) => a + b, 0) / tempAfternoon.length
+            ),
+      afternoon_chance_of_rain:
+        rainAfternoon.length === 0
+          ? "Insufficient forecast data"
+          : Number(
+              (
+                rainAfternoon.reduce((a, b) => a + b, 0) / rainAfternoon.length
+              ).toFixed(2)
+            ),
+      high_temperature: Math.max(...tempAll),
+      low_temperature: Math.min(...tempAll),
+    };
 
-    // Process each day
-    Object.keys(grpDay).forEach(day => {
-        const entries = grpDay[day];
-        const tMorning = [];
-        const rMorning = [];
-        const tAfternoon = [];
-        const rAfternoon = [];
-        const tAll = entries.map(entry => entry.average_temperature);
+    // Format reader-friendly date
+    const dayName = format(parseISO(day), "EEEE MMMM dd").replace(" 0", " ");
 
-        entries.forEach(entry => {
-            const entryTime = parseISO(entry.date_time);
-            const hour = entryTime.getHours();
-            // Collect morning period entries
-            if (6 <= hour && hour < 12) {
-                tMorning.push(entry.average_temperature);
-                rMorning.push(entry.probability_of_rain);
-            }
-            // Collect afternoon period entries
-            else if (12 <= hour && hour < 18) {
-                tAfternoon.push(entry.average_temperature);
-                rAfternoon.push(entry.probability_of_rain);
-            }
-        });
+    summaries[dayName] = summary;
+  });
 
-        const summary = {
-            // If no morning data, report insufficient data
-            morning_average_temperature: tMorning.length === 0 ? "Insufficient forecast data" :
-                Math.round(tMorning.reduce((a, b) => a + b, 0) / tMorning.length),
-            morning_chance_of_rain: rMorning.length === 0 ? "Insufficient forecast data" :
-                Number((rMorning.reduce((a, b) => a + b, 0) / rMorning.length).toFixed(2)),
-            // If no afternoon data, report insufficient data
-            afternoon_average_temperature: tAfternoon.length === 0 ? "Insufficient forecast data" :
-                Math.round(tAfternoon.reduce((a, b) => a + b, 0) / tAfternoon.length),
-            afternoon_chance_of_rain: rAfternoon.length === 0 ? "Insufficient forecast data" :
-                Number((rAfternoon.reduce((a, b) => a + b, 0) / rAfternoon.length).toFixed(2)),
-            high_temperature: Math.max(...tAll),
-            low_temperature: Math.min(...tAll)
-        };
-
-        // Format reader-friendly date
-        const dayName = format(parseISO(day), 'EEEE MMMM dd').replace(' 0', ' ');
-
-        summaries[dayName] = summary;
-    });
-
-    return summaries;
+  return summaries;
 }
 
 module.exports = summarizeForecast;
