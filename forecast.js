@@ -34,19 +34,18 @@ function sum(nums) {
 
 function averageTemp(items) {
   if (items.length === 0) return "Insufficient forecast data";
-  const total = sum(items.map((entry) => entry.average_temperature));
+  const total = sum(items.map((item) => item.average_temperature));
   return Math.round(total / items.length);
 }
 
 function chanceOfRain(items) {
-  return items.length === 0
-    ? "Insufficient forecast data"
-    : Number(
-        (
-          items.reduce((acc, item) => acc + item.probability_of_rain, 0) /
-          items.length
-        ).toFixed(2)
-      );
+  if (items.length === 0) return "Insufficient forecast data";
+  const total = sum(items.map((item) => item.probability_of_rain));
+  return Number((total / items.length).toFixed(2));
+}
+
+function formatDayName(date) {
+  return format(parseISO(date), "EEEE MMMM dd").replace(" 0", " ");
 }
 
 function createSumaries(groupedData) {
