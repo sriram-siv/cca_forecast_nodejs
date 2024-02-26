@@ -48,18 +48,23 @@ function formatDate(date) {
   return format(parseISO(date), "EEEE MMMM dd").replace(" 0", " ");
 }
 
+function getHighTemperature(items) {
+  return Math.max(...items.map((item) => item.average_temperature));
+}
+
+function getLowTemperature(items) {
+  return Math.min(...items.map((item) => item.average_temperature));
+}
 
 function createSumaries(groupedData) {
   const entries = Object.entries(groupedData).map(([day, items]) => {
-    const tempAll = items.map((entry) => entry.average_temperature);
-
     const summary = {
       morning_average_temperature: averageTemp(items.filter(isMorningItem)),
       morning_chance_of_rain: chanceOfRain(items.filter(isMorningItem)),
       afternoon_average_temperature: averageTemp(items.filter(isAfternoonItem)),
       afternoon_chance_of_rain: chanceOfRain(items.filter(isAfternoonItem)),
-      high_temperature: Math.max(...tempAll),
-      low_temperature: Math.min(...tempAll),
+      high_temperature: getHighTemperature(items),
+      low_temperature: getLowTemperature(items),
     };
 
     return [formatDate(day), summary];
