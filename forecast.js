@@ -48,12 +48,9 @@ function formatDate(date) {
   return format(parseISO(date), "EEEE MMMM dd").replace(" 0", " ");
 }
 
-function createSumaries(groupedData) {
-  const summaries = {};
 
-  // Process each day
-  Object.keys(groupedData).forEach((day) => {
-    const items = groupedData[day];
+function createSumaries(groupedData) {
+  const entries = Object.entries(groupedData).map(([day, items]) => {
     const tempAll = items.map((entry) => entry.average_temperature);
 
     const summary = {
@@ -65,12 +62,10 @@ function createSumaries(groupedData) {
       low_temperature: Math.min(...tempAll),
     };
 
-    const formattedDate = formatDate(day);
-
-    summaries[formattedDate] = summary;
+    return [formatDate(day), summary];
   });
 
-  return summaries;
+  return Object.fromEntries(entries);
 }
 
 function summarizeForecast(data) {
