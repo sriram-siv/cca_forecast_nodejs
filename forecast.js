@@ -51,47 +51,55 @@ function morningChanceOfRain(items) {
       );
 }
 
+function afternoonAverageTemp(items) {
+  const afternoonItems = items.filter((item) => {
+    const itemTime = parseISO(item.date_time);
+    const hour = itemTime.getHours();
+    return 12 <= hour && hour < 18;
+  });
+
+  return afternoonItems.length === 0
+    ? "Insufficient forecast data"
+    : Math.round(
+        afternoonItems.reduce(
+          (acc, item) => acc + item.average_temperature,
+          0
+        ) / afternoonItems.length
+      );
+}
+
+function afternoonChanceOfRain(items) {
+  const afternoonItems = items.filter((item) => {
+    const itemTime = parseISO(item.date_time);
+    const hour = itemTime.getHours();
+    return 12 <= hour && hour < 18;
+  });
+
+  return afternoonItems.length === 0
+    ? "Insufficient forecast data"
+    : Number(
+        (
+          afternoonItems.reduce(
+            (acc, item) => acc + item.probability_of_rain,
+            0
+          ) / afternoonItems.length
+        ).toFixed(2)
+      );
+}
+
 function createSumaries(groupedData) {
   const summaries = {};
 
   // Process each day
   Object.keys(groupedData).forEach((day) => {
     const items = groupedData[day];
-    const tempAfternoon = [];
-    const rainAfternoon = [];
     const tempAll = items.map((entry) => entry.average_temperature);
 
-    items.forEach((entry) => {
-      const entryTime = parseISO(entry.date_time);
-      const hour = entryTime.getHours();
-
-      // Collect afternoon period entries
-      if (12 <= hour && hour < 18) {
-        tempAfternoon.push(entry.average_temperature);
-        rainAfternoon.push(entry.probability_of_rain);
-      }
-    });
-
     const summary = {
-      // If no morning data, report insufficient data
       morning_average_temperature: morningAverageTemp(items),
       morning_chance_of_rain: morningChanceOfRain(items),
-
-      // If no afternoon data, report insufficient data
-      afternoon_average_temperature:
-        tempAfternoon.length === 0
-          ? "Insufficient forecast data"
-          : Math.round(
-              tempAfternoon.reduce((a, b) => a + b, 0) / tempAfternoon.length
-            ),
-      afternoon_chance_of_rain:
-        rainAfternoon.length === 0
-          ? "Insufficient forecast data"
-          : Number(
-              (
-                rainAfternoon.reduce((a, b) => a + b, 0) / rainAfternoon.length
-              ).toFixed(2)
-            ),
+      afternoon_average_temperature: afternoonAverageTemp(items),
+      afternoon_chance_of_rain: afternoonChanceOfRain(items),
       high_temperature: Math.max(...tempAll),
       low_temperature: Math.min(...tempAll),
     };
