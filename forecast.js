@@ -22,64 +22,28 @@ function isMorningItem(item) {
   return 6 <= hour && hour < 12;
 }
 
-function morningAverageTemp(items) {
-  const morningItems = items.filter(isMorningItem);
+function isAfternoonItem(item) {
+  const itemTime = parseISO(item.date_time);
+  const hour = itemTime.getHours();
+  return 12 <= hour && hour < 18;
+}
 
-  return morningItems.length === 0
+function averageTemp(items) {
+  return items.length === 0
     ? "Insufficient forecast data"
     : Math.round(
-        morningItems.reduce((acc, item) => acc + item.average_temperature, 0) /
-          morningItems.length
+        items.reduce((acc, item) => acc + item.average_temperature, 0) /
+          items.length
       );
 }
 
-function morningChanceOfRain(items) {
-  const morningItems = items.filter(isMorningItem);
-
-  return morningItems.length === 0
+function chanceOfRain(items) {
+  return items.length === 0
     ? "Insufficient forecast data"
     : Number(
         (
-          morningItems.reduce(
-            (acc, item) => acc + item.probability_of_rain,
-            0
-          ) / morningItems.length
-        ).toFixed(2)
-      );
-}
-
-function afternoonAverageTemp(items) {
-  const afternoonItems = items.filter((item) => {
-    const itemTime = parseISO(item.date_time);
-    const hour = itemTime.getHours();
-    return 12 <= hour && hour < 18;
-  });
-
-  return afternoonItems.length === 0
-    ? "Insufficient forecast data"
-    : Math.round(
-        afternoonItems.reduce(
-          (acc, item) => acc + item.average_temperature,
-          0
-        ) / afternoonItems.length
-      );
-}
-
-function afternoonChanceOfRain(items) {
-  const afternoonItems = items.filter((item) => {
-    const itemTime = parseISO(item.date_time);
-    const hour = itemTime.getHours();
-    return 12 <= hour && hour < 18;
-  });
-
-  return afternoonItems.length === 0
-    ? "Insufficient forecast data"
-    : Number(
-        (
-          afternoonItems.reduce(
-            (acc, item) => acc + item.probability_of_rain,
-            0
-          ) / afternoonItems.length
+          items.reduce((acc, item) => acc + item.probability_of_rain, 0) /
+          items.length
         ).toFixed(2)
       );
 }
@@ -93,10 +57,10 @@ function createSumaries(groupedData) {
     const tempAll = items.map((entry) => entry.average_temperature);
 
     const summary = {
-      morning_average_temperature: morningAverageTemp(items),
-      morning_chance_of_rain: morningChanceOfRain(items),
-      afternoon_average_temperature: afternoonAverageTemp(items),
-      afternoon_chance_of_rain: afternoonChanceOfRain(items),
+      morning_average_temperature: averageTemp(items.filter(isMorningItem)),
+      morning_chance_of_rain: chanceOfRain(items.filter(isMorningItem)),
+      afternoon_average_temperature: averageTemp(items.filter(isAfternoonItem)),
+      afternoon_chance_of_rain: chanceOfRain(items.filter(isAfternoonItem)),
       high_temperature: Math.max(...tempAll),
       low_temperature: Math.min(...tempAll),
     };
