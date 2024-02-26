@@ -44,7 +44,7 @@ function chanceOfRain(items) {
   return Number((total / items.length).toFixed(2));
 }
 
-function formatDayName(date) {
+function formatDate(date) {
   return format(parseISO(date), "EEEE MMMM dd").replace(" 0", " ");
 }
 
@@ -65,10 +65,9 @@ function createSumaries(groupedData) {
       low_temperature: Math.min(...tempAll),
     };
 
-    // Format reader-friendly date
-    const dayName = format(parseISO(day), "EEEE MMMM dd").replace(" 0", " ");
+    const formattedDate = formatDate(day);
 
-    summaries[dayName] = summary;
+    summaries[formattedDate] = summary;
   });
 
   return summaries;
