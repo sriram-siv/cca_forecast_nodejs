@@ -16,12 +16,14 @@ function groupByDay(data) {
   return groupedData;
 }
 
+function isMorningItem(item) {
+  const itemTime = parseISO(item.date_time);
+  const hour = itemTime.getHours();
+  return 6 <= hour && hour < 12;
+}
+
 function morningAverageTemp(items) {
-  const morningItems = items.filter((item) => {
-    const itemTime = parseISO(item.date_time);
-    const hour = itemTime.getHours();
-    return 6 <= hour && hour < 12;
-  });
+  const morningItems = items.filter(isMorningItem);
 
   return morningItems.length === 0
     ? "Insufficient forecast data"
@@ -31,13 +33,8 @@ function morningAverageTemp(items) {
       );
 }
 
-
 function morningChanceOfRain(items) {
-  const morningItems = items.filter((item) => {
-    const itemTime = parseISO(item.date_time);
-    const hour = itemTime.getHours();
-    return 6 <= hour && hour < 12;
-  });
+  const morningItems = items.filter(isMorningItem);
 
   return morningItems.length === 0
     ? "Insufficient forecast data"
