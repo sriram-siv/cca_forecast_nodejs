@@ -28,13 +28,14 @@ function isAfternoonItem(item) {
   return 12 <= hour && hour < 18;
 }
 
+function sum(nums) {
+  return nums.reduce((acc, num) => acc + num);
+}
+
 function averageTemp(items) {
-  return items.length === 0
-    ? "Insufficient forecast data"
-    : Math.round(
-        items.reduce((acc, item) => acc + item.average_temperature, 0) /
-          items.length
-      );
+  if (items.length === 0) return "Insufficient forecast data";
+  const total = sum(items.map((entry) => entry.average_temperature));
+  return Math.round(total / items.length);
 }
 
 function chanceOfRain(items) {
