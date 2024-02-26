@@ -5,8 +5,11 @@ const weatherData = require('./data');
 describe('ForecastTest', function() {
     const summary = summarizeForecast(weatherData);
 
-    it('should correctly calculate morning average temperature', function() {
-        assert.strictEqual(summary["Sunday February 18"]["morning_average_temperature"], 10);
+    it("should correctly calculate morning average temperature", function () {
+      assert.strictEqual(
+        summary["Sunday February 18"]["morning_average_temperature"],
+        10
+      );
     });
 
     it('should correctly calculate morning chance of rain', function() {

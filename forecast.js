@@ -16,24 +16,37 @@ function groupByDay(data) {
   return groupedData;
 }
 
+function morningAverageTemp(items) {
+  const morningItems = items.filter((item) => {
+    const itemTime = parseISO(item.date_time);
+    const hour = itemTime.getHours();
+    return 6 <= hour && hour < 12;
+  });
+
+  return morningItems.length === 0
+    ? "Insufficient forecast data"
+    : Math.round(
+        morningItems.reduce((acc, item) => acc + item.average_temperature, 0) /
+          morningItems.length
+      );
+}
+
 function createSumaries(groupedData) {
   const summaries = {};
 
   // Process each day
   Object.keys(groupedData).forEach((day) => {
-    const entries = groupedData[day];
-    const tempMorning = [];
+    const items = groupedData[day];
     const rainMorning = [];
     const tempAfternoon = [];
     const rainAfternoon = [];
-    const tempAll = entries.map((entry) => entry.average_temperature);
+    const tempAll = items.map((entry) => entry.average_temperature);
 
-    entries.forEach((entry) => {
+    items.forEach((entry) => {
       const entryTime = parseISO(entry.date_time);
       const hour = entryTime.getHours();
       // Collect morning period entries
       if (6 <= hour && hour < 12) {
-        tempMorning.push(entry.average_temperature);
         rainMorning.push(entry.probability_of_rain);
       }
       // Collect afternoon period entries
@@ -45,12 +58,8 @@ function createSumaries(groupedData) {
 
     const summary = {
       // If no morning data, report insufficient data
-      morning_average_temperature:
-        tempMorning.length === 0
-          ? "Insufficient forecast data"
-          : Math.round(
-              tempMorning.reduce((a, b) => a + b, 0) / tempMorning.length
-            ),
+      morning_average_temperature: morningAverageTemp(items),
+
       morning_chance_of_rain:
         rainMorning.length === 0
           ? "Insufficient forecast data"
