@@ -4,8 +4,7 @@ function groupByDay(data) {
   const groupedData = {};
 
   data.forEach((entry) => {
-    const entryTime = parseISO(entry.date_time);
-    const [date] = entryTime.toISOString().split("T");
+    const [date] = parseISO(entry.date_time).toISOString().split("T");
 
     groupedData[date] ??= [];
     groupedData[date].push(entry);
