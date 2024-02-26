@@ -56,29 +56,25 @@ function getLowTemperature(items) {
   return Math.min(...items.map((item) => item.average_temperature));
 }
 
-function createSumaries(groupedData) {
-  const entries = Object.entries(groupedData).map(([day, items]) => {
-    const summary = {
-      morning_average_temperature: averageTemp(items.filter(isMorningItem)),
-      morning_chance_of_rain: chanceOfRain(items.filter(isMorningItem)),
-      afternoon_average_temperature: averageTemp(items.filter(isAfternoonItem)),
-      afternoon_chance_of_rain: chanceOfRain(items.filter(isAfternoonItem)),
-      high_temperature: getHighTemperature(items),
-      low_temperature: getLowTemperature(items),
-    };
+function processDay([day, items]) {
+  const summary = {
+    morning_average_temperature: averageTemp(items.filter(isMorningItem)),
+    morning_chance_of_rain: chanceOfRain(items.filter(isMorningItem)),
+    afternoon_average_temperature: averageTemp(items.filter(isAfternoonItem)),
+    afternoon_chance_of_rain: chanceOfRain(items.filter(isAfternoonItem)),
+    high_temperature: getHighTemperature(items),
+    low_temperature: getLowTemperature(items),
+  };
 
-    return [formatDate(day), summary];
-  });
-
-  return Object.fromEntries(entries);
+  return [formatDate(day), summary];
 }
 
 function summarizeForecast(data) {
   const groupedByDay = groupByDay(data);
 
-  const summaries = createSumaries(groupedByDay);
+  const dayEntries = Object.entries(groupedByDay).map(processDay);
 
-  return summaries;
+  return Object.fromEntries(dayEntries);
 }
 
 module.exports = summarizeForecast;
